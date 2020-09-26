@@ -3,9 +3,10 @@
         1.1 main (background)
     2. Functions
         2.1 logo
-        2.2 background*/
+        2.2 background
+        2.3 backgroundToggle*/
 /*main*/
-background(); /*matching background to the user time + respecting motion*/
+background("on"); /*matching background to the user time + respecting motion*/
 /*logo*/
 function logo(id, content) {
     if (id.textContent !== content) {
@@ -20,23 +21,32 @@ function logo(id, content) {
     }
 }
 /*background*/
-function background() {
+function background(state) {
     var time = new Date();
     var hour = time.getHours();
     if (hour < 6 || hour > 18) {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            document.body.style.backgroundColor = "darkgray";
-        }
-        else {
-            document.body.style.backgroundImage = "url('assets/background-night.gif')";
-        }
+        var background = ["url(assets/background-night.gif)", "darkgray"];
     }
     else {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            document.body.style.backgroundColor = "white";
-        }
-        else {
-            document.body.style.backgroundImage = "url('assets/background-day.gif')";
-        }
+        var background = ["url(assets/background-day.gif)", "white"];
+    }
+    if (state == "off" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        console.log(state);
+        document.body.style.backgroundColor = background[1];
+        document.body.style.backgroundImage = "url(#)";
+    }
+    else if (state == "on") {
+        console.log(state);
+        document.body.style.backgroundImage = background[0];
+        document.body.style.backgroundColor = "";
+    }
+}
+/*backgroundToggle*/
+function backgroundToggle() {
+    if (document.body.style.backgroundColor == "") {
+        background("off");
+    }
+    else {
+        background("on");
     }
 }

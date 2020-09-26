@@ -1,22 +1,25 @@
 /* Table of Contents:
     1. Imports
-        1.1. fonts
+        1.1 fonts
     2. Animations
-        2.x. [placeholder]
+        2.x [placeholder]
     3. Globals
-        3.1. init
-        3.3. background
+        3.1 init
+        3.2 background
     4. Header
-        4.1. banner
-        4.2. logo
-    5. Body (index)
-        5.1. proceed button */
+        4.1 banner
+        4.2 logo
+    5. Body
+        5.1 bg-toggle
+    6. Media statements
+        6.1 reduced motion*/
 
 /*fonts*/
 @import url('https://fonts.googleapis.com/css2?family=Knewave&display=swap');
 
 /*init*/
 html,body {
+    display: grid;
     margin: 0;
     height: 100%;
     width: 100%;
@@ -57,6 +60,7 @@ body {
 
 .logo {
     color: gray;
+    grid-row: 1;
     font-family: 'Knewave', cursive;
     font-weight: 100;
     font-size: 65px;
@@ -65,23 +69,27 @@ body {
     margin: 0;
 }
 
-/*proceed button*/
-.proceed {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
+/*bg-toggle*/
+.bg-toggle {
+    all: unset;
     grid-row: 3;
+    padding: 10px;
+    width: 50px;
+    border-radius: 15px;
+    margin: auto 10px 10px auto;
+    color: white;
+    background-color: gray;
+    font-size: 10px;
+    font-family: Roboto;
+    text-align: center;
 }
 
-.proceed svg {
-    color: gray;
+.bg-toggle:active {
+    background-color: darkcyan;
 }
 
-.proceed svg:hover, svg:active {
-    color: darkcyan;
-}
 
+/*reduced motion*/
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

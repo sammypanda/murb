@@ -7,6 +7,21 @@
     </head>
     
     <body>
+        <button class='bg-toggle' onclick='backgroundToggle()'>Toggle Background</button>
+    
         <script src='assets/app.js'></script>
+        
+        <style>
+            /*page grid*/
+            body {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 100px auto auto;
+            }
+            
+            .bg-toggle {
+                grid-column: 3;
+            }
+        </style>
     </body>
 </html>
