@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Murb</title>
+        <link rel='stylesheet' href='assets/style.css'>
+        <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    </head>
+    
+    <body>
+        <div class='banner'>
+            <h1 class='logo' id='mu' onclick='logo(mu,"music")' title='click me'>mu</h1>
+            <h1 class='logo' id='rb' onclick='logo(rb,"curb")' title='click me'>rb</h1>
+        </div>
+        
+        <a class='proceed' href='radio.html'>
+            <svg width="250px" height="250px" viewBox="0 0 16 16" class="bi bi-play-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+            </svg>
+        </a>
+        
+        <style>
+            /*page grid*/
+            body {
+                display: grid;
+                grid-template-columns: 1fr;
+                grid-template-rows: 100px 100px 80px;
+            }
+        </style>
+        
+        <script src='assets/app.js'></script>
+    </body>
+</html>
