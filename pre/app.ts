@@ -29,17 +29,15 @@ function background(state: string) {
     var hour = time.getHours();
     
     if (hour < 6 || hour > 18) {
-        var background = ["url(assets/background-night.gif)","darkgray"];
+        var background = ["url(assets/background-night.gif)","#202020"];
     } else {
         var background = ["url(assets/background-day.gif)","white"];
     }
         
     if (state == "off" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        console.log(state);
         document.body.style.backgroundColor = background[1];
         document.body.style.backgroundImage = "url(#)";
     } else if (state == "on") {
-        console.log(state);
         document.body.style.backgroundImage = background[0];
         document.body.style.backgroundColor = "";
     }

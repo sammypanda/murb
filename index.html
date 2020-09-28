@@ -18,7 +18,7 @@
             </svg>
         </a>
         
-        <button class='bg-toggle' onclick='backgroundToggle()'>Toggle Background</button>
+        <button id='bg-toggle' onclick='backgroundToggle()'>Toggle Background</button>
         
         <script src='assets/app.js'></script>
         
@@ -39,6 +39,11 @@
             
             .proceed svg {
                 color: gray;
+            }
+
+            .proceed svg:active {
+                width: 195px;
+                height: 195px;
             }
             
             .proceed svg:hover, svg:active {

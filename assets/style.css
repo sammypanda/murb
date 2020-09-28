@@ -16,6 +16,7 @@
 
 /*fonts*/
 @import url('https://fonts.googleapis.com/css2?family=Knewave&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 /*init*/
 html,body {
@@ -67,27 +68,33 @@ body {
     display: inline;
     float: left;
     margin: 0;
+    cursor: pointer;
 }
 
 /*bg-toggle*/
-.bg-toggle {
+#bg-toggle {
     all: unset;
     grid-row: 3;
     padding: 10px;
     width: 50px;
     border-radius: 15px;
     margin: auto 10px 10px auto;
-    color: white;
-    background-color: gray;
+    background-color: transparent;
+    color: gray;
     font-size: 10px;
     font-family: Roboto;
     text-align: center;
+    cursor: pointer;
 }
 
-.bg-toggle:active {
+#bg-toggle:active {
+    padding: 9px;
+}
+
+#bg-toggle:active, #bg-toggle:hover {
     background-color: darkcyan;
+    color: black;
 }
-
 
 /*reduced motion*/
 @media (prefers-reduced-motion: reduce) {
