@@ -1,5 +1,3 @@
-# Directories
-music/
-
 # Files
-*.mp3
+assets/music/*
+!assets/music/.gitkeep
