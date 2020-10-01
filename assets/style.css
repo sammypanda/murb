@@ -27,7 +27,7 @@ html,body {
 }
 
 a {
-    unset: all;
+    all: unset;
 }
 
 a:visited {
@@ -66,7 +66,6 @@ body {
     font-weight: 100;
     font-size: 65px;
     display: inline;
-    float: left;
     margin: 0;
     cursor: pointer;
 }
