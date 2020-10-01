@@ -43,7 +43,7 @@ do
             #add to queue
         ;;
         clean)
-            rm * ./assets/music
+            rm ./assets/music/* -v
             #clean current/queue
         ;;
         *)
