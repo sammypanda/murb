@@ -5,21 +5,20 @@
         2.1 logo
         2.2 background
         2.3 backgroundToggle*/
-    
-    
+
 /*main*/
 background("on"); /*matching background to the user time + respecting motion*/
 
 /*logo*/
-function logo(id,content) {
+function logo(id: HTMLElement, content: string) {
     if (id.textContent !== content) {
         id.textContent = content;
         id.style.color = "darkcyan";
-        document.getElementById(id.id).title = '';
+        id.title = '';  
     } else {
         id.textContent = id.id;
         id.style.color = "gray";
-        document.getElementById(id.id).title = 'click me';
+        id.title = 'click me';
     }
 }
 

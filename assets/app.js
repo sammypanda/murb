@@ -1,3 +1,4 @@
+"use strict";
 /* Table of Contents:
     1. Init
         1.1 main (background)
@@ -12,12 +13,12 @@ function logo(id, content) {
     if (id.textContent !== content) {
         id.textContent = content;
         id.style.color = "darkcyan";
-        document.getElementById(id.id).title = '';
+        id.title = '';
     }
     else {
         id.textContent = id.id;
         id.style.color = "gray";
-        document.getElementById(id.id).title = 'click me';
+        id.title = 'click me';
     }
 }
 /*background*/
