@@ -1,20 +1,35 @@
-# *) Globals
+# Table of Contents:
+    #1 Variables
+        #1a Globals
+        #1b Load
+        #1c Help
+    #2 Dependencies
+        #2a Youtube-DL
+        #2b JQ
+    #3 Functions
+        #3a remove()
+        #3b list()
+        #3c help()
+        #3d load()
+
+# Variables) Globals
 musicDir="./assets/music"
 
-# Load) Globals
+# Variables) Load
 mp3dl="youtube-dl -x --audio-format mp3 -o '%(title)s.%(ext)s'"
 
-# Help) Globals
+# Variables) Help
 help=("help" "exit" "list" "load" "remove" "start" "stop")
 tip=("outputs this message, try 'help [option]'" "exits the controller and sync process" "shows the queued and the loaded songs" "parses songs from youtube, try 'load [song name]'" "removes loaded songs, try 'remove [song/all]'" "moves songs from the queue to the play-state" "stops streaming to murb")
 
-# Dependencies
+# Dependencies) Youtube-DL
 if ! [[ `pip3 show youtube-dl` ]]; then
     sudo apt-get install pip3
     pip3 install youtube-dl
     sudo apt-get install ffmpeg
 fi
 
+# Dependencies) JQ
 if ! [[ `dpkg -s jq` ]]; then
     sudo apt-get install jq
 fi
@@ -51,7 +66,6 @@ function help() {
             help[i]="$(tput bold)${help[i]}$(tput sgr0)" # Adjusting the array to make the current option bold
             echo -e "${help[@]}\n$(tput dim)- ${tip[i]}$(tput sgr0)\n" # Outputting the modified array and the matching tip
             help[i]="$savedOption" # Returning the array to normal
-        fi
         ((i++))
     done
 }
