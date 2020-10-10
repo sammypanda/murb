@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./assets", /* Redirect output structure to the assets directory. */
+    "outDir": "../assets", /* Redirect output structure to the assets directory. */
     "strict": true, /* Enable all strict type-checking options. */
     "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */
   }

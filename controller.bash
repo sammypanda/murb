@@ -41,8 +41,8 @@ function remove() {
     if [[ $targetFile ]]; then
         read -p "Enter 'yes' to delete $(tput bold)$targetFile$(tput sgr0): " answer
         if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then # Translates $answer to lowercase
-            rm -v "$directory/$targetFile"
-            echo -e "temp: [$(tput setaf 2)deleted$(tput sgr0)]\n"
+            rm "$directory/$targetFile"
+            echo -e "[$(tput setaf 2)deleted$(tput sgr0)]\n"
         else
             echo -e "[$(tput setaf 1)cancelled$(tput sgr0)]\n"
         fi
@@ -66,6 +66,7 @@ function help() {
             help[i]="$(tput bold)${help[i]}$(tput sgr0)" # Adjusting the array to make the current option bold
             echo -e "${help[@]}\n$(tput dim)- ${tip[i]}$(tput sgr0)\n" # Outputting the modified array and the matching tip
             help[i]="$savedOption" # Returning the array to normal
+        fi
         ((i++))
     done
 }
@@ -73,10 +74,11 @@ function help() {
 function load() {
     query=$1
     if [[ $query ]]; then
+        echo $query
         $mp3dl "ytsearch:$query" # Temporarily store the song in the root
         file=`ls | grep ".mp3"` # Find the song
         if [[ $file ]]; then
-            mv $file ./assets/music # Move to correct place
+            mv "$file" ./assets/music # Move to correct place
             echo -e "\n[stored $(tput setaf 4)$file$(tput sgr0)]\n"
             read -p "Enter 'yes' to queue $(tput bold)$file$(tput sgr0): " answer
             if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then

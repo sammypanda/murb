@@ -33,10 +33,10 @@ function background(state) {
     var time = new Date();
     var hour = time.getHours();
     if (hour < 6 || hour > 18) {
-        var background = ["url(assets/background-night.gif)", "#101010"];
+        var background = ["url(assets/images/background-night.gif)", "#101010"];
     }
     else {
-        var background = ["url(assets/background-day.gif)", "white"];
+        var background = ["url(assets/images/background-day.gif)", "white"];
     }
     if (state == "off" || getCookie("bg_state") == "off" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         document.body.style.backgroundColor = background[1];
