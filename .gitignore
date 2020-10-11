@@ -1,4 +1,5 @@
 # Files
 assets/music/*
+assets/meta/*
 !assets/music/.gitkeep
 .sync.log
