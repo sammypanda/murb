@@ -45,7 +45,7 @@ fi
 
 # Functions
 function syncActivity() {
-    if [[ `jq -r '.sync' $current` == "on" ]]; then
+    if [[ `jq -r '.sync' $current` == "on" ]]; then # Parameter 'jq -r' (raw) removes quotations from output
         echo -e "[sync active at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
     else
         echo -e "[$(tput setaf 1)sync inactive$(tput sgr0)]\n"
@@ -87,7 +87,7 @@ function list() {
 function help() {
     option=$1
     syncActivity
-    option=`echo $option | tr [:upper:] [:lower:]` # Translates $option to lowercase
+    option=`echo $option | tr [:upper:] [:lower:]`
     if [[ ! $option ]]; then
         option="help"
     fi
@@ -161,7 +161,7 @@ function syncProcess() {
 function sync() {
     cat <<< $(jq '.sync = "on"' $current) > $current
     while true; do
-        if [[ ! `cat $current | jq -r '.remaining'` == "0" ]]; then
+        if [[ ! `cat $current | jq -r '.remaining'` == "0" ]]; then # The current song is still active
             time=`cat $current | jq -r '.remaining'`
             file=`jq -r '.file' $current`
             if [[ `cat $current | jq -r '.duration'` == $time ]]; then
@@ -170,22 +170,22 @@ function sync() {
                 echo -e "\n[resuming $(tput setaf 4)$file$(tput sgr0)]\n"
             fi
             while [[ $time -ge 0 ]]; do
-                echo $time
-                cat <<< $(jq --arg time $time '.remaining = $time' $current) > $current
+                echo $time # Output seconds in .sync.log
+                cat <<< $(jq --arg time $time '.remaining = $time' $current) > $current # Update time
                 time=$(($time - 1))
                 sleep 1s
             done
-        else
+        else # The current song has finished
             file=`jq -r '.songs[0].file' $queue`
             duration=`jq -r '.songs[0].duration' $queue`
-            if [[ ! $file == null ]]; then
-                echo "{\"file\": \"$file\", \"remaining\": \"$duration\", \"duration\": \"$duration\"}" | jq . > $current
+            if [[ ! $file == null ]]; then # A song was found in the queue
+                echo "{\"file\": \"$file\", \"remaining\": \"$duration\", \"duration\": \"$duration\"}" | jq . > $current # Move queue song to current song
                 echo -e "\n[playing $(tput setaf 4)$file$(tput sgr0)]\n"
-                cat <<< $(jq 'del(.songs[0])' $queue) > $queue
-            else
+                cat <<< $(jq 'del(.songs[0])' $queue) > $queue # Remove new current song from the queue
+            else # No song was found in queue
                 echo -e "\n[reached $(tput setaf 1)end of queue$(tput sgr0)]\n"
-                syncProcess "off"
-                break
+                syncProcess "off" # End the sync
+                break # Break the while loop
             fi
         fi
     done
@@ -194,14 +194,14 @@ function sync() {
 function skip() {
     selection=$1
     index=$((selection - 1))
-    number='^[1-9]+$'
+    number='^[1-9]+$' # Regex for accepting all numerical characters but 0
     syncActivity
     if [[ $selection =~ $number ]]; then
         selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
         cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
         echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
     elif [[ $selection == "" ]] || [[ $selection == 0 ]]; then
-        if [[ `jq -r '.sync' $current` == "on" ]]; then 
+        if [[ `jq -r    '.sync' $current` == "on" ]]; then 
             syncProcess "off"
             cat <<< $(jq '.remaining = 0' $current) > $current
             echo -e "[skipped $(tput setaf 4)`jq '.file' $current`$(tput sgr0)]\n"
@@ -218,14 +218,14 @@ function skip() {
 function trapsxoxo() {
     syncProcess "off"
     if [[ `ls ./ | grep -e .webm -e .mp3` ]]; then
-        ls ./ | grep -e .webm -e .mp3 | xargs rm; rm "`ls ./ | grep -e .webm -e .mp3`"
+        ls ./ | grep -e .webm -e .mp3 | xargs rm; rm "`ls ./ | grep -e .webm -e .mp3`" # Workaround for any complicated file quotations
     fi
     exit
 }
 
 # Main
 clear
-trap trapsxoxo 2 20
+trap trapsxoxo 2 20 # 2 = CTRL+C | 20 = CTRL+Z
 syncActivity
 while true; do
     read -p "command: " input
@@ -235,13 +235,13 @@ while true; do
             trapsxoxo
         ;;
         help*)
-            help "${input#help}"
+            help "${input#help}" # The regex removes 'help' from the input
         ;;
         list|ls)
             list
         ;;
         remove*)
-            song "remove" "$musicDir" "`echo ${input#remove} | xargs echo -n`"
+            song "remove" "$musicDir" "`echo ${input#remove} | xargs echo -n`" # The xarg removes leading and trailing whitespace
         ;;
         load*)
             load "${input#load}"
