@@ -1,17 +1,17 @@
 /* Table of Contents:
     1. Init
-        1.1 main (background)
+        1.1 main
             1.1a default background state (on)
     2. Functions
-        2.1 logo
-        2.2 cookies
-        2.3 background
-        2.4 backgroundToggle*/
+        2.1 logo()
+        2.2 getCookie()
+        2.3 background()
+        2.4 backgroundToggle()*/
     
 /*main*/
 background("on"); /*setting default background and matching to the user time*/
 
-/*logo*/
+/*logo()*/
 function logo(id: HTMLElement, content: string) {
     if (id.textContent !== content) {
         id.textContent = content;
@@ -24,13 +24,13 @@ function logo(id: HTMLElement, content: string) {
     }
 }
 
-/*cookies*/
+/*getCookie()*/
 function getCookie(name: string) {
     let result = document.cookie.match("(^|[^;]+)\\s*" + name + "\\s*=\\s*([^;]+)")
     return result ? result.pop() : ""
 }
 
-/*background*/
+/*background()*/
 function background(state: string) {
     var time = new Date();
     var hour = time.getHours();
@@ -50,7 +50,7 @@ function background(state: string) {
     }
 }
 
-/*backgroundToggle*/
+/*backgroundToggle()*/
 function backgroundToggle() {
     if (document.body.style.backgroundColor == "") {
         document.cookie = "bg_state=off";
