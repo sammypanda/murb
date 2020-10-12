@@ -45,6 +45,10 @@ fi
 
 # Functions
 function syncActivity() {
+    if [[ ! -f ./assets/meta/current.json ]]; then
+        touch ./assets/meta/{current,queue}.json
+    fi
+
     if [[ `jq -r '.sync' $current` == "on" ]]; then # Parameter 'jq -r' (raw) removes quotations from output
         echo -e "[sync active at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
     else
@@ -80,8 +84,16 @@ function song() {
 function list() {
     syncActivity
     echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls ./assets/music`\n"
-    echo -e "$(tput bold)playing:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
-    echo -e "$(tput bold)queued:$(tput sgr0) \n`jq '.songs[].file' $queue -r`\n"
+    if [[ `jq .remaining $current -r` -gt 0 ]]; then
+        if [[ `jq .sync $current -r` == "on" ]]; then
+            echo -e "$(tput bold)stopped:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
+        else
+            echo -e "$(tput bold)paused:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
+        fi
+    fi
+    if [[ ! `jq .songs[0].file $queue` == null ]]; then
+        echo -e "$(tput bold)queued:$(tput sgr0) \n`jq '.songs[].file' $queue -r`\n"
+    fi
 }
 
 function help() {
@@ -161,7 +173,7 @@ function syncProcess() {
 function sync() {
     cat <<< $(jq '.sync = "on"' $current) > $current
     while true; do
-        if [[ ! `cat $current | jq -r '.remaining'` == "0" ]]; then # The current song is still active
+        if [[ `cat $current | jq -r '.remaining'` -gt 0 ]]; then # The current song is still active
             time=`cat $current | jq -r '.remaining'`
             file=`jq -r '.file' $current`
             if [[ `cat $current | jq -r '.duration'` == $time ]]; then

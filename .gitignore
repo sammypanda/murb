@@ -1,5 +1,10 @@
-# Files
+# Directories
 assets/music/*
 assets/meta/*
+
+# Keepies
 !assets/music/.gitkeep
+!assets/meta/.gitkeep
+
+# Files
 .sync.log
