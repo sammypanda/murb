@@ -33,14 +33,16 @@ current="./assets/meta/current.json"; queue="./assets/meta/queue.json"
 
 # Dependencies) Youtube-DL
 if ! [[ `pip3 show youtube-dl` ]]; then
-    sudo apt-get install pip3
+    sudo apt-get install -y pip3
     pip3 install youtube-dl
-    sudo apt-get install ffmpeg
+    sudo apt-get install -y ffmpeg
+    echo PATH=/home/sammy/.local/bin:$PATH >> ~/.bashrc
+    source ~/.bashrc
 fi
 
 # Dependencies) JQ
 if ! [[ `dpkg -s jq` ]]; then
-    sudo apt-get install jq
+    sudo apt-get install -y jq
 fi
 
 # Functions
