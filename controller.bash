@@ -32,12 +32,11 @@ tip=("outputs this message, try 'help [option]'" "exits the controller and sync 
 current="./assets/meta/current.json"; queue="./assets/meta/queue.json"
 
 # Dependencies) Youtube-DL
-if ! [[ `pip3 show youtube-dl` ]]; then
-    sudo apt-get install -y pip3
-    pip3 install youtube-dl
-    sudo apt-get install -y ffmpeg
-    echo PATH=/home/sammy/.local/bin:$PATH >> ~/.bashrc
-    source ~/.bashrc
+if ! [[ -f /usr/bin/youtube-dl ]]; then
+    sudo apt-get install -y python ffmpeg
+    sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl
+    sudo chmod a+rx /usr/bin/youtube-dl
+    youtube-dl -U
 fi
 
 # Dependencies) JQ
@@ -88,7 +87,7 @@ function list() {
     echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls ./assets/music`\n"
     if [[ `jq .remaining $current -r` -gt 0 ]]; then
         if [[ `jq .sync $current -r` == "on" ]]; then
-            echo -e "$(tput bold)stopped:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
+            echo -e "$(tput bold)current:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
         else
             echo -e "$(tput bold)paused:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
         fi
@@ -130,12 +129,14 @@ function load() {
             if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then
                 queue "$file"
             fi
-        else
-            echo -e "[$(tput setaf 1)cancelled$(tput sgr0)]\n"
+        else # Retry until the JSON parse works (yt-dl issue)
+            clear
+            load "$query"
         fi
     else
         echo -e "load $(tput setaf 1)[name/url]$(tput sgr0)\n"
     fi
+    clear
 }
 
 function queue() {
@@ -215,7 +216,7 @@ function skip() {
         cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
         echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
     elif [[ $selection == "" ]] || [[ $selection == 0 ]]; then
-        if [[ `jq -r    '.sync' $current` == "on" ]]; then 
+        if [[ `jq -r '.sync' $current` == "on" ]]; then 
             syncProcess "off"
             cat <<< $(jq '.remaining = 0' $current) > $current
             echo -e "[skipped $(tput setaf 4)`jq '.file' $current`$(tput sgr0)]\n"
@@ -230,10 +231,11 @@ function skip() {
 }
 
 function trapsxoxo() {
-    syncProcess "off"
+    syncProcess "off" || cat <<< $(jq '.sync = "off"' $current) > $current
     if [[ `ls ./ | grep -e .webm -e .mp3` ]]; then
         ls ./ | grep -e .webm -e .mp3 | xargs rm; rm "`ls ./ | grep -e .webm -e .mp3`" # Workaround for any complicated file quotations
     fi
+    rm -f *{.mp3,webm\',m4a\'}
     exit
 }
 

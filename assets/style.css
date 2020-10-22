@@ -18,6 +18,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Knewave&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
+@keyframes pulse {
+    50% {color: darkcyan;}
+}
+
 /*init*/
 html,body {
     display: grid;
@@ -93,6 +97,20 @@ body {
 #bg-toggle:active, #bg-toggle:hover {
     background-color: darkcyan;
     color: black;
+}
+
+/*broadcast*/
+#broadcast {
+    grid-row: 3;
+    padding: 12px;
+    margin: auto auto 5px 10px;
+    color: gray;
+    font-size: 12px;
+    font-family: Roboto;
+    text-align: center;
+    animation-name: pulse;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
 }
 
 /*reduced motion*/
