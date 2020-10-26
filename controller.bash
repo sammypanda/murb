@@ -87,9 +87,9 @@ function list() {
     echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls ./assets/music`\n"
     if [[ `jq .remaining $current -r` -gt 0 ]]; then
         if [[ `jq .sync $current -r` == "on" ]]; then
-            echo -e "$(tput bold)current:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
+            echo -e "$(tput bold)current:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds remaining\n"
         else
-            echo -e "$(tput bold)paused:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds\n"
+            echo -e "$(tput bold)paused:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds remaining\n"
         fi
     fi
     if [[ ! `jq .songs[0].file $queue` == null ]]; then
@@ -141,9 +141,10 @@ function load() {
 
 function queue() {
     song=$1
+    hours="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c13-14`
     minutes="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c16-17`
     seconds="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c19-20`
-    duration=$(( minutes * 60 + seconds ))
+    duration=$(( hours * 3600 + minutes * 60 + seconds ))
     if [[ ! -f "$current" ]] || [[ `cat $current | jq -r '.remaining'` == "0" ]]; then
         echo "{\"file\": \"$song\", \"remaining\": \"$duration\", \"duration\": \"$duration\"}" | jq . > $current
         echo -e "\n[playing $(tput setaf 4)$song$(tput sgr0)]\n"
@@ -160,22 +161,27 @@ function queue() {
 }
 
 function syncProcess() {
+    kill $sync_pid &> /dev/null
+    unset sync_pid
     if [[ $1 == "on" ]]; then
+        while [[ "`jq '.sync' $current`" == "\"off\"" ]]; do 
+            cat <<< $(jq '.sync = "on"' $current) > $current 
+        done
+        cat <<< $(jq '.sync = "on"' $current) > $current
         sync > .sync.log 2>&1 &
         sync_pid=$!
         echo -e "[started sync at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
     elif [[ $1 == "off" ]]; then
-        if [[ $sync_pid ]]; then
-            kill $sync_pid
-            echo -e "[$(tput setaf 1)stopped sync$(tput sgr0)]\n"
-        fi
-        cat <<< $(jq '.sync = "off"' $current) > $current
+        while [[ `jq '.sync' $current` == \"on\" ]]; do 
+            cat <<< $(jq '.sync = "off"' $current) > $current 
+        done
+        echo -e "[$(tput setaf 1)stopped sync$(tput sgr0)]\n"
     fi
 }
 
 function sync() {
-    cat <<< $(jq '.sync = "on"' $current) > $current
     while true; do
+    cat <<< $(jq '.sync = "on"' $current) > $current
         if [[ `cat $current | jq -r '.remaining'` -gt 0 ]]; then # The current song is still active
             time=`cat $current | jq -r '.remaining'`
             file=`jq -r '.file' $current`
@@ -202,6 +208,8 @@ function sync() {
                 syncProcess "off" # End the sync
                 break # Break the while loop
             fi
+            kill $sync_pid
+            unset sync_pid
         fi
     done
 }
@@ -218,8 +226,10 @@ function skip() {
     elif [[ $selection == "" ]] || [[ $selection == 0 ]]; then
         if [[ `jq -r '.sync' $current` == "on" ]]; then 
             syncProcess "off"
+            sleep 2s
             cat <<< $(jq '.remaining = 0' $current) > $current
             echo -e "[skipped $(tput setaf 4)`jq '.file' $current`$(tput sgr0)]\n"
+            sleep 2s
             syncProcess "on"
         else
             cat <<< $(jq '.remaining = 0' $current) > $current

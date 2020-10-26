@@ -107,10 +107,15 @@ body {
     color: gray;
     font-size: 12px;
     font-family: Roboto;
-    text-align: center;
+    text-align: left;
     animation-name: pulse;
     animation-duration: 5s;
     animation-iteration-count: infinite;
+}
+
+#megarareissue {
+    cursor: pointer;
+    color: gray;
 }
 
 /*reduced motion*/

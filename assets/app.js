@@ -2,76 +2,135 @@
 /* Table of Contents:
     1. Init
         1.1 main
-            1.1a default background state (on)
+            1.1a background("on") - updates theme and sets default to on
+            1.1c element shortcuts
+            1.1d error catch counter
     2. Functions
-        2.1 clientSync()
-        2.2 logo()
-        2.3 getCookie()
-        2.4 background()
-        2.5 backgroundToggle()*/
+        2.1 checkSync()
+        2.2 clientSync()
+        2.3 logo()
+        2.4 getCookie()
+        2.5 background()
+        2.6 backgroundToggle()*/
 /*main*/
-background("on"); /*setting default background and matching to the user time*/
+background("on");
+checkSync();
+var playbutton = document.getElementById('playbutton');
+var broadcast = document.getElementById('broadcast');
+var song = new Audio();
+var oopsies = 0;
+function checkSync() {
+    fetch('assets/meta/current.json')
+        .then(function (file) {
+        return file.json();
+    })
+        .then(function (current) {
+        var messagePart = broadcast.innerHTML.split(" ");
+        if (current.sync == "on") {
+            if (messagePart[1] == "ongoing" || messagePart[0] == "No" || messagePart[2] == "host" || messagePart[0] == "Uh-oh,") {
+                broadcast.innerHTML = "Broadcast ongoing <br> " + current.file;
+            }
+        }
+        else if (current.sync == "off") {
+            if (messagePart[3] !== "auto-join") {
+                broadcast.innerHTML = "No broadcast ongoing";
+            }
+        }
+    })["catch"](function (error) {
+        var messagePart = broadcast.innerHTML.split(" ");
+        if (messagePart[1] !== "corrupted") {
+            broadcast.innerHTML = "Uh-oh, check the host is running controller.bash";
+        }
+    });
+    setTimeout(checkSync, 10000);
+}
 /*clientSync*/
 function clientSync() {
     fetch('assets/meta/current.json')
-        .then(function (u) {
-        return u.json();
+        .then(function (file) {
+        return file.json();
     })
-        .then(function (json) {
-        var playbutton = document.getElementById('playbutton');
-        var broadcast = document.getElementById('broadcast');
-        var file = decodeURIComponent(json.file);
-        var duration = (json.duration - json.remaining); // has an odd 10ish second delay
-        var song = new Audio("assets/music/" + file);
-        var sync = decodeURIComponent(json.sync);
-        if (sync == "off") {
-            console.log("Sync: " + sync);
-            playbutton.removeAttribute("onclick");
-            broadcast.innerHTML = "No broadcast ongoing<br> auto-join is on";
+        .then(function (current) {
+        if (song.id !== "currentSong") {
+            var duration = (current.duration - current.remaining);
+            song = new Audio("assets/music/" + current.file);
+            song.id = "currentSong";
+            song.currentTime = duration;
+        }
+        else {
+            console.log("[Broadcast already running]");
+            return;
+        }
+        if (current.sync == "off") {
+            oopsies = 0;
+            console.log("Sync: off");
+            broadcast.innerHTML = "No broadcast ongoing<br> auto-join is on, reload to turn off";
+            playbutton.removeAttribute('onclick');
             playbutton.style.color = "darkcyan";
             playbutton.style.cursor = "default";
             playbutton.style.display = "grid";
-            setTimeout(function () {
-                clientSync();
-            }, 1000);
+            song.id = "";
+            setTimeout(clientSync, 2000); // sets a constant reset
         }
-        else {
+        else if (current.sync == "on") {
             song.play().then(function (result) {
-                console.log("joined at " + song.currentTime + "/" + json.duration + " seconds of " + file);
+                playbutton.style.display = "none";
+                broadcast.innerHTML = "Broadcast joined <br> " + current.file;
+                console.log("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
                 function ongoing() {
-                    fetch('assets/meta/current.json')
-                        .then(function (u) {
-                        return u.json();
+                    fetch('./assets/meta/current.json')
+                        .then(function (file) {
+                        return file.json();
                     })
-                        .then(function (json) {
-                        var sync = decodeURIComponent(json.sync);
-                        if (sync == "on") {
-                            playbutton.style.display = "none";
-                            playbutton.style.color = "darkcyan";
-                            broadcast.innerHTML = "Broadcast ongoing";
-                            setTimeout(ongoing, 1000);
+                        .then(function (current) {
+                        if (current.sync == "on") {
+                            console.log("Sync: on");
+                            oopsies = 0;
+                            setTimeout(ongoing, 2000);
                         }
-                        else if (sync == "off") {
+                        else if (current.sync == "off") {
+                            oopsies = 0;
                             song.pause();
-                            broadcast.innerHTML = "No broadcast ongoing";
-                            playbutton.style.display = "grid";
-                            playbutton.style.color = "gray";
+                            song.id = "";
                             clientSync();
                         }
                         else {
-                            broadcast.innerHTML = "Update the controller:<br>'sync state not found or corrupt'";
                             ongoing();
+                        }
+                        song.onended = function () {
+                            oopsies = 0;
+                            song.pause();
+                            song.id = "";
+                            clientSync();
+                        };
+                    })["catch"](function (error) {
+                        console.log("%c[smol json oopsie-doopsie]", "color: lightpink; font-weight: 700");
+                        if (oopsies >= 16) {
+                            window.location.reload(false);
+                        }
+                        else {
+                            oopsies += 1;
+                            setTimeout(ongoing, 1000);
                         }
                     });
                 }
-                ongoing();
-            }, function (error) {
-                broadcast.innerHTML = "No broadcast ongoing";
-                playbutton.style.display = "grid";
-                playbutton.style.color = "gray";
-                playbutton.setAttribute("onclick", 'clientSync()');
+                ongoing(); // triggering the sync status check
             });
-            song.currentTime = duration; // debuggies - appears slower than controller
+        }
+        else {
+            clientSync();
+        }
+    })["catch"](function (error) {
+        console.log("%c[big json oopsie-doopsie]", "color: lightpink; font-weight: 700");
+        broadcast.innerHTML = "Broadcast corrupted";
+        playbutton.style.color = "darkcyan";
+        playbutton.style.cursor = "default";
+        if (oopsies == 6) {
+            window.location.reload(false);
+        }
+        else {
+            oopsies += 1;
+            setTimeout(clientSync, 1000);
         }
     });
 }
