@@ -118,25 +118,30 @@ function help() {
 
 function load() {
     query=$1
-    if [[ $query ]]; then
-        echo $query
-        $mp3dl "ytsearch:$query" # Temporarily store the song in the root
-        file=`ls | grep ".mp3"` # Find the song
-        if [[ $file ]]; then
-            mv "$file" ./assets/music # Move to correct place
-            echo -e "\n[stored $(tput setaf 4)$file$(tput sgr0)]\n"
-            read -p "Enter 'yes' to queue $(tput bold)$file$(tput sgr0): " answer
-            if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then
-                queue "$file"
+    url=`echo $query | grep 'http\|youtube.com'`
+    if ! [[ $url ]]; then
+        if [[ $query ]]; then
+            echo $query
+            $mp3dl "ytsearch:$query" # Temporarily store the song in the root
+            file=`ls | grep ".mp3"` # Find the song
+            if [[ $file ]]; then
+                mv "$file" ./assets/music # Move to correct place
+                echo -e "\n[stored $(tput setaf 4)$file$(tput sgr0)]\n"
+                read -p "Enter 'yes' to queue $(tput bold)$file$(tput sgr0): " answer
+                if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then
+                    queue "$file"
+                fi
+            else # Retry until the JSON parse works (yt-dl issue)
+                load "$query"
             fi
-        else # Retry until the JSON parse works (yt-dl issue)
             clear
-            load "$query"
+        else
+            echo -e "load $(tput setaf 1)[name/url]$(tput sgr0)\n"
         fi
     else
+        echo "(please only use titles for searching)"
         echo -e "load $(tput setaf 1)[name/url]$(tput sgr0)\n"
     fi
-    clear
 }
 
 function queue() {
@@ -245,7 +250,7 @@ function trapsxoxo() {
     if [[ `ls ./ | grep -e .webm -e .mp3` ]]; then
         ls ./ | grep -e .webm -e .mp3 | xargs rm; rm "`ls ./ | grep -e .webm -e .mp3`" # Workaround for any complicated file quotations
     fi
-    rm -f *{.mp3,webm\',m4a\'}
+    rm -f *{.mp3,webm\',m4a\',\'.part,\'.ytdl}
     exit
 }
 
