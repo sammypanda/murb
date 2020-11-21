@@ -209,7 +209,7 @@ function sync() {
                 echo $time # Output seconds in .sync.log
                 cat <<< $(jq --arg time $time '.remaining = $time' $current) > $current # Update time
                 time=$(($time - 1))
-                sleep 1s
+                sleep 0.9s # Adjusts for 0.1s delay
             done
         else # The current song has finished
             file=`jq -r '.songs[0].file' $queue`
