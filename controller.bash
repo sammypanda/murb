@@ -33,15 +33,25 @@ current="./assets/meta/current.json"; queue="./assets/meta/queue.json"
 
 # Dependencies) Youtube-DL
 if ! [[ -f /usr/bin/youtube-dl ]]; then
-    sudo apt-get install -y python ffmpeg
+    if [[ apt ]]; then
+        sudo apt-get install -y python ffmpeg
+    fi
+    if [[ eopkg ]]; then
+        sudo eopkg install -y python ffmpeg
+    fi
     sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl
     sudo chmod a+rx /usr/bin/youtube-dl
     youtube-dl -U
 fi
 
 # Dependencies) JQ
-if ! [[ `dpkg -s jq` ]]; then
-    sudo apt-get install -y jq
+if ! [[ -f /usr/bin/jq ]]; then
+    if [[ apt ]]; then
+        sudo apt-get install -y jq
+    fi
+    if [[ eopkg ]]; then
+        sudo eopkg install -y jq
+    fi
 fi
 
 # Functions
