@@ -22,22 +22,22 @@ var oopsies = 0
 
 function checkSync() { // doubles as auto-join
     fetch('assets/meta/current.json')
-    .then(function(file){ 
+    .then(file => {
         return file.json();
     })
-    .then(function(current){
+    .then(current => {
         var messagePart = broadcast.innerHTML.split(" ");
         if (current.sync == "on") {
-            if (messagePart[1] == "ongoing" || messagePart[0] == "No" || messagePart[2] == "host" || messagePart[0] == "Uh-oh,") { 
+            if (messagePart[1] == "ongoing" || messagePart[0] == "No" || messagePart[2] == "host" || messagePart[0] == "Uh-oh,") {
                 broadcast.innerHTML = "Broadcast ongoing <br> " + current.file;
             }
-        } else if (current.sync == "off") { 
+        } else if (current.sync == "off") {
             if (messagePart[3] !== "auto-join") {
                 broadcast.innerHTML = "No broadcast ongoing";
             }
         }
     })
-    .catch((error) => {
+    .catch(error => {
         var messagePart = broadcast.innerHTML.split(" ");
         if (messagePart[1] !== "corrupted") {
             broadcast.innerHTML = "Uh-oh, check the host is running controller.bash";
@@ -49,10 +49,10 @@ function checkSync() { // doubles as auto-join
 /*clientSync*/
 function clientSync() {
     fetch('assets/meta/current.json')
-    .then(function(file) { 
+    .then(file => {
         return file.json();
     })
-    .then(function(current) {
+    .then(current => {
         if (song.id !== "currentSong") {
             var duration = (current.duration - current.remaining);
             song = new Audio("assets/music/" + current.file);
@@ -80,10 +80,10 @@ function clientSync() {
                 console.log("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
                 function ongoing() { // keeps checking sync status once sync is seen as on
                     fetch('./assets/meta/current.json')
-                    .then(function(file) {
+                    .then(file => {
                         return file.json();
                     })
-                    .then(function(current) {
+                    .then(current => {
                         if (current.sync == "on") {
                             console.log("Sync: on");
                             oopsies = 0;
@@ -96,7 +96,7 @@ function clientSync() {
                         } else {
                             ongoing()
                         }
-                        song.onended = function() {
+                        song.onended = () => {
                             oopsies = 0;
                             song.pause();
                             song.id = "";
@@ -111,7 +111,7 @@ function clientSync() {
                             oopsies+=1;
                             setTimeout(ongoing, 1000);
                         }
-                    });  
+                    });
                 }
                 ongoing(); // triggering the sync status check
             });
@@ -138,7 +138,7 @@ function logo(id: HTMLElement, content: string) {
     if (id.textContent !== content) {
         id.textContent = content;
         id.style.color = "darkcyan";
-        id.title = '';  
+        id.title = '';
     } else {
         id.textContent = id.id;
         id.style.color = "gray";
@@ -181,4 +181,13 @@ function backgroundToggle() {
         document.cookie = "bg_state=on";
         background("on");
     }
-}   
+}
+
+var music = document.querySelector("#mu")!;
+var curb = document.querySelector("#rb")!;
+
+[music, curb].forEach((logoPart) => {
+    logoPart.addEventListener('click', (e) => {
+        console.log("someone hit the logo");window.location.href = "https://github.com/Samdvich/murb";
+    });
+});

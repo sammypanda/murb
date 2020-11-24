@@ -8,3 +8,4 @@ assets/meta/*
 
 # Files
 .sync.log
+assets/app.js

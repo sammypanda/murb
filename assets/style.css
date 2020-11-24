@@ -48,22 +48,11 @@ body {
 .banner {
     grid-column: 1/3;
     display: grid;
-    grid-template-columns: auto auto 100%;
+    grid-template-columns: auto auto auto auto 100%;
 }
 
 /*logo*/
-.logo:nth-child(1) {
-    margin-left: 15px;
-    padding-left: 10px;
-    margin-top: -13px;
-}
-
-.logo:nth-child(2) {
-    margin-right: 10px;
-    padding-right: 10px;
-}
-
-.logo {
+.music, .curb {
     color: gray;
     grid-row: 1;
     font-family: 'Knewave', cursive;
@@ -71,7 +60,42 @@ body {
     font-size: 65px;
     display: inline;
     margin: 0;
+    cursor: default;
+    transition: 2s;
+}
+
+.music {
+    margin-top: -13px;
+}
+
+.curb {
+    transform: translateX(-150px);
+}
+
+#mu {
+    z-index: 1;
     cursor: pointer;
+    margin-left: 15px;
+    padding-left: 10px;
+}
+
+#rb {
+    z-index: 1;
+    cursor: pointer;
+    margin-right: 10px;
+    padding-right: 10px;
+}
+
+#sic, #cu {
+    opacity: 0;
+}
+
+#mu:hover ~ .curb {
+    transform: translateX(0);
+}
+
+#mu:hover ~ .music, #mu:hover ~ .curb {
+    opacity: 100;
 }
 
 /*bg-toggle*/
@@ -87,7 +111,6 @@ body {
     font-size: 10px;
     font-family: Roboto;
     text-align: center;
-    cursor: pointer;
 }
 
 #bg-toggle:active {
