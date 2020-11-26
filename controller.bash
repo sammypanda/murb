@@ -69,13 +69,25 @@ function syncActivity() {
 
 function song() {
     state=$1; directory=$2; file=$3
-    syncActivity
+    if [[ `echo "$file" | grep -w "\-y"` ]]; then # If the file has the -y parameter
+        param="-y"
+        file=`echo "${file%-y}" | xargs echo -n`
+    fi
+    if [ "$file" == "*" ]; then
+        playMultiple "$musicDir"
+        return
+    fi
     if [[ ! $file ]]; then
         echo -e "[$(tput setaf 1)please input song title$(tput sgr0)]\n"
     else
-        targetFile=`ls $directory | grep -i -m1 "$file"` # Find a matching file to input
+        file=`echo "$file" | sed 's/[][]/\\&/g'`
+        targetFile=`ls $directory | sed 's/[][]/\\&/g' | grep -i -m1 "${file}"` # Find a matching file to input
         if [[ $targetFile ]]; then
-            read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
+            if [ "$param" == "-y" ]; then 
+                answer="yes"
+            else
+                read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
+            fi
             if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then # Translates $answer to lowercase
                 if [[ $state == "remove" ]]; then
                     rm "$directory/$targetFile"
@@ -83,6 +95,8 @@ function song() {
                 elif [[ $state == "play" ]]; then
                     queue "$targetFile"
                 fi
+            elif [[ `echo $answer | tr [:upper:] [:lower:]` == "cancel" ]]; then
+                return 1
             else
                 echo -e "[$(tput setaf 1)cancelled$(tput sgr0)]\n"
             fi
@@ -93,7 +107,6 @@ function song() {
 }
 
 function list() {
-    syncActivity
     echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls ./assets/music`\n"
     if [[ `jq .remaining $current -r` -gt 0 ]]; then
         if [[ `jq .sync $current -r` == "on" ]]; then
@@ -109,7 +122,6 @@ function list() {
 
 function help() {
     option=$1
-    syncActivity
     option=`echo $option | tr [:upper:] [:lower:]`
     if [[ ! $option ]]; then
         option="help"
@@ -233,7 +245,6 @@ function skip() {
     selection=$1
     index=$((selection - 1))
     number='^[1-9]+$' # Regex for accepting all numerical characters but 0
-    syncActivity
     if [[ $selection =~ $number ]]; then
         selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
         cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
@@ -255,6 +266,18 @@ function skip() {
     fi
 }
 
+function playMultiple() {
+    list=$1
+    for dir in $musicDir/*; do
+        cancel=$? # return 0 = continue, return 1 = cancel
+        if [ $cancel -ne 0 ]; then
+            break
+        else
+            song "play" "$musicDir" "${dir#$musicDir"/"}"
+        fi
+    done
+}
+
 function trapsxoxo() {
     syncProcess "off" || cat <<< $(jq '.sync = "off"' $current) > $current
     if [[ `ls ./ | grep -e .webm -e .mp3` ]]; then
@@ -267,8 +290,8 @@ function trapsxoxo() {
 # Main
 clear
 trap trapsxoxo 2 20 # 2 = CTRL+C | 20 = CTRL+Z
-syncActivity
 while true; do
+    syncActivity
     read -p "command: " input
     clear
     case $input in
@@ -288,7 +311,7 @@ while true; do
             load "${input#load}"
         ;;
         play*)
-            song "play" "$musicDir" "`echo ${input#play} | xargs echo -n`"
+            song "play" "$musicDir" "`echo "${input#play}" | xargs echo -n`"
         ;;
         start)
             syncProcess "on"
@@ -300,7 +323,6 @@ while true; do
             skip "`echo ${input#skip} | xargs echo -n`"
         ;;
         *)
-            syncActivity
             echo -e "[$(tput setaf 1)unknown command$(tput sgr0)]\ntry 'help'\n"
         ;;
     esac
