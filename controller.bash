@@ -117,7 +117,15 @@ function list() {
         fi
     fi
     if [[ ! `jq .songs[0].file $queue` == null ]]; then
-        echo -e "$(tput bold)queued:$(tput sgr0) \n`jq '.songs[].file' $queue -r`\n"
+        echo -e "$(tput bold)queued:$(tput sgr0)"
+        IFS=$'\n' # foreach loops separate newline instead of whitespace
+        i=1
+        for song in `jq '.songs[].file' $queue -r`; do
+            echo "$i. $song"
+            i=$((i+1))
+        done
+        unset i
+        echo -e
     fi
 }
 
