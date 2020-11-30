@@ -85,6 +85,7 @@ function song() {
         if [[ $targetFile ]]; then
             if [ "$param" == "-y" ]; then 
                 answer="yes"
+                unset -v param
             else
                 read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
             fi
