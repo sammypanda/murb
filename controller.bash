@@ -19,17 +19,19 @@
         #3j trapsxoxo()
 
 # Variables) Globals
-musicDir="./assets/music"
+script=$(readlink -f "$0")
+scriptDir=$(dirname "$script")
+musicDir="$scriptDir/assets/music"
 
 # Variables) Load
-mp3dl="youtube-dl -x --audio-format mp3 -o '%(title)s.%(ext)s'"
+mp3dl="youtube-dl -x --audio-format mp3 -o "$scriptDir/"'%(title)s.%(ext)s'"
 
 # Variables) Help
 help=("help*" "exit" "list" "load*" "remove*" "play*" "start" "stop" "skip*")
 tip=("outputs this message, try 'help [option]'" "exits the controller and sync process" "shows the queued and the loaded songs" "parses songs from youtube, try 'load [song name]'" "removes loaded songs, try 'remove [song]'" "plays loaded songs, try 'play [song]'" "moves songs from the queue to the play-state" "stops streaming to murb" "skips the current song, try 'skip [queue song index]'")
 
 # Variables) Syncing
-current="./assets/meta/current.json"; queue="./assets/meta/queue.json"
+current="$scriptDir/assets/meta/current.json"; queue="$scriptDir/assets/meta/queue.json"
 
 # Dependencies) Youtube-DL
 if ! [[ -f /usr/bin/youtube-dl ]]; then
@@ -56,8 +58,9 @@ fi
 
 # Functions
 function syncActivity() {
-    if [[ ! -f ./assets/meta/current.json ]]; then
-        touch ./assets/meta/{current,queue}.json
+    if [[ ! -f $current ]]; then
+        touch $current
+	touch $queue
     fi
 
     if [[ `jq -r '.sync' $current` == "on" ]]; then # Parameter 'jq -r' (raw) removes quotations from output
@@ -108,7 +111,7 @@ function song() {
 }
 
 function list() {
-    echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls ./assets/music`\n"
+    echo -e "$(tput bold)loaded:$(tput sgr0) \n`ls $musicDir`\n"
     if [[ `jq .remaining $current -r` -gt 0 ]]; then
         if [[ `jq .sync $current -r` == "on" ]]; then
             echo -e "$(tput bold)current:$(tput sgr0) \n`jq .file $current -r` @ `jq .remaining $current -r` seconds remaining\n"
@@ -154,9 +157,10 @@ function load() {
         if [[ $query ]]; then
             echo $query
             $mp3dl "ytsearch:$query" # Temporarily store the song in the root
-            file=`ls | grep ".mp3"` # Find the song
+            file=`ls "$scriptDir" | grep ".mp3"` # Find the song
             if [[ $file ]]; then
-                mv "$file" ./assets/music # Move to correct place
+                echo $musicDir
+                mv "$scriptDir/$file" "$musicDir" # Move to correct place
                 echo -e "\n[stored $(tput setaf 4)$file$(tput sgr0)]\n"
                 read -p "Enter 'yes' to queue $(tput bold)$file$(tput sgr0): " answer
                 if [[ `echo $answer | tr [:upper:] [:lower:]` == "yes" ]]; then
@@ -177,9 +181,9 @@ function load() {
 
 function queue() {
     song=$1
-    hours="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c13-14`
-    minutes="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c16-17`
-    seconds="10#"`ffmpeg -i ./assets/music/"$song" 2>&1 | grep Duration: | cut -c19-20`
+    hours="10#"`ffmpeg -i "$musicDir/$song" 2>&1 | grep Duration: | cut -c13-14`
+    minutes="10#"`ffmpeg -i "$musicDir/$song" 2>&1 | grep Duration: | cut -c16-17`
+    seconds="10#"`ffmpeg -i "$musicDir/$song" 2>&1 | grep Duration: | cut -c19-20`
     duration=$(( hours * 3600 + minutes * 60 + seconds ))
     if [[ ! -f "$current" ]] || [[ `cat $current | jq -r '.remaining'` == "0" ]]; then
         echo "{\"file\": \"$song\", \"remaining\": \"$duration\", \"duration\": \"$duration\"}" | jq . > $current
@@ -289,15 +293,11 @@ function playMultiple() {
 
 function trapsxoxo() {
     syncProcess "off" || cat <<< $(jq '.sync = "off"' $current) > $current
-    if [[ `ls ./ | grep -e .webm -e .mp3` ]]; then
-        ls ./ | grep -e .webm -e .mp3 | xargs rm; rm "`ls ./ | grep -e .webm -e .mp3`" # Workaround for any complicated file quotations
-    fi
-    rm -f *{.mp3,webm\',m4a\',\'.part,\'.ytdl}
+    rm -f $scriptDir/*{mp3,webm,m4a,part,ytdl}*
     exit
 }
 
 # Main
-clear
 trap trapsxoxo 2 20 # 2 = CTRL+C | 20 = CTRL+Z
 while true; do
     syncActivity
@@ -308,7 +308,7 @@ while true; do
             trapsxoxo
         ;;
         help*)
-            help "${input#help}" # The regex removes 'help' from the input
+            help "`echo "${input#help}" | xargs echo -n`" # The regex removes 'help' from the input
         ;;
         list|ls)
             list
