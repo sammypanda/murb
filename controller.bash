@@ -128,6 +128,7 @@ function list() {
             i=$((i+1))
         done
         unset i
+        unset IFS
         echo -e
     fi
 }
