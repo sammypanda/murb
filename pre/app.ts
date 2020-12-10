@@ -193,7 +193,8 @@ function trackName() {
     })
     .then(current => {
         document.getElementsByTagName('p')[0].innerHTML = current.file;
-    })
+    });
+    setTimeout(trackName, 2000);
 }
 
 var music = document.querySelector("#mu")!;
