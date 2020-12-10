@@ -188,6 +188,6 @@ var curb = document.querySelector("#rb")!;
 
 [music, curb].forEach((logoPart) => {
     logoPart.addEventListener('click', (e) => {
-        console.log("someone hit the logo");window.location.href = "https://github.com/Samdvich/murb";
+        window.location.href = "https://github.com/Samdvich/murb";
     });
 });
