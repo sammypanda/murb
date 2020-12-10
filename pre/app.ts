@@ -202,10 +202,7 @@ function trackName() {
 }
 
 if (document.title == "Current Murb Track") {
-    console.log("good")
     trackName();
-} else {
-    console.log("trash");
 }
 
 var music = document.querySelector("#mu")!;
