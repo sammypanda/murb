@@ -197,6 +197,13 @@ function trackName() {
     setTimeout(trackName, 2000);
 }
 
+if (document.title == "Current Murb Track") {
+    console.log("good")
+    trackName();
+} else {
+    console.log("trash");
+}
+
 var music = document.querySelector("#mu")!;
 var curb = document.querySelector("#rb")!;
 
