@@ -192,7 +192,7 @@ function trackName() {
         return file.json();
     })
     .then(current => {
-        console.log(current);
+        console.log(current.file);
     })
 }
 
