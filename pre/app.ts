@@ -10,7 +10,8 @@
         2.3 logo()
         2.4 getCookie()
         2.5 background()
-        2.6 backgroundToggle()*/
+        2.6 backgroundToggle()
+        2.7 trackName()*/
     
 /*main*/
 background("on");
@@ -180,6 +181,17 @@ function backgroundToggle() {
     } else {
         document.cookie = "bg_state=on";
         background("on");
+    }
+}
+
+/*trackName()*/
+function trackName() {
+    fetch('assets/meta/current.json')
+    .then(file => {
+        return file.json();
+    })
+    .then(current => {
+        console.log(current);
     }
 }
 
