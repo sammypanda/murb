@@ -192,7 +192,11 @@ function trackName() {
         return file.json();
     })
     .then(current => {
-        document.getElementsByTagName('p')[0].innerHTML = current.file;
+        if (current.sync == "on") {
+            document.getElementsByTagName('p')[0].innerHTML = current.file;
+        } else {
+            document.getElementsByTagName('p')[0].innerHTML = "Nothing Playing";
+        }
     });
     setTimeout(trackName, 2000);
 }
