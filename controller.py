@@ -18,8 +18,22 @@
         #3i skip()
 
 # Imports) Globals
-import os
+import os, youtube_dl
 
 # Variables) Globals
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 musicDir = scriptDir + "/assets/music"
+
+# Options) Globals
+ytdl_opts = {
+    'format': 'bestaudio/best',
+    'outtmpl': (musicDir + '/%(title)s.%(ext)s'),
+    'default_search': 'ytsearch',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+    }],
+}
+
+with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
+    ytdl.download(["test"])
