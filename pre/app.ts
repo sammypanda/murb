@@ -186,13 +186,14 @@ function backgroundToggle() {
 
 /*trackName()*/
 function trackName() {
+    console.log("test");
     fetch('assets/meta/current.json')
     .then(file => {
         return file.json();
     })
     .then(current => {
         console.log(current);
-    }
+    })
 }
 
 var music = document.querySelector("#mu")!;
