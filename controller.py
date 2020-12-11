@@ -53,6 +53,12 @@ def help(option=""):
             print(each)
         i = i + 1
 
+def exit():
+    for file in os.listdir(scriptDir):
+        if file.endswith(tuple([".ytdl", ".webm", ".m4a", ".part"])):
+            os.remove(file)
+    quit()
+
 while True:
     print()
     command = input("command: ")
@@ -63,3 +69,5 @@ while True:
 
     if "help" in command:
         help(command.replace('help ',''))
+    elif "exit" in command:
+        exit()
