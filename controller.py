@@ -14,13 +14,14 @@
         #3i skip()
 
 # Imports) Globals
-import os, youtube_dl
+import os, youtube_dl, json
 
 # Variables) Globals
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 musicDir = scriptDir + "/assets/music"
 
 class color:
+    GREEN = '\033[32m'
     RED = '\033[31m'
     BOLD = '\033[1m'
     END = '\033[0m'
@@ -42,9 +43,20 @@ ytdl_opts = {
     'progress_hooks': [ytdl_hook],
 }
 
-# Menu) Help
+# Help)
 helpTitle = ("help*", "exit", "list", "load*", "remove*", "play*", "start", "stop", "skip*")
 helpTip = ("outputs this message, try 'help [option]'", "exits the controller and sync process", "shows the queued and the loaded songs", "parses songs from youtube, try 'load [song name]'", "removes loaded songs, try 'remove [song]'", "plays loaded songs, try 'play [song]'", "moves songs from the queue to the play-state", "stops streaming to murb", "skips the current song, try 'skip [queue song index]'")
+
+# Startup)
+meta = ["queue.json", "current.json"]
+if not os.path.isfile(scriptDir + '/assets/meta/queue.json'):
+    queueJSON = { "songs": [{ "file": "", "duration": 0 }] }
+    currentJSON = { "file": "", "remaining": 0, "duration": 0 }
+
+    with open(scriptDir + '/assets/meta/queue.json', 'w') as queue:
+        json.dump(queueJSON, queue, sort_keys=True, indent=2)
+    with open(scriptDir + '/assets/meta/current.json', 'w') as current:
+        json.dump(currentJSON, current, sort_keys=True, indent=2)
 
 # Functions)
 def help(option=""):
@@ -73,10 +85,18 @@ def load(song):
             ytdl.download([song])
             if 'loadedfile' in globals():
                 print(loadedfile)
+                answer = input("\n" + "Enter 'yes' to queue " + color.BOLD + loadedfile + color.END + "\n")
+                if answer.lower() == "yes":
+                    queue(loadedfile)
+                else:
+                    print("\n" + "[ " + color.GREEN + "Cancelled" + color.END + " ]")
             else:
                 load(song)
     else:
         help("load")
+
+def queue(song):
+    print(song)
 
 while True:
     print()
