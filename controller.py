@@ -53,10 +53,10 @@ if not os.path.isfile(scriptDir + '/assets/meta/queue.json'):
     queueJSON = { "songs": [{ "file": "", "duration": 0 }] }
     currentJSON = { "file": "", "remaining": 0, "duration": 0 }
 
-    with open(scriptDir + '/assets/meta/queue.json', 'w') as queue:
-        json.dump(queueJSON, queue, sort_keys=True, indent=2)
-    with open(scriptDir + '/assets/meta/current.json', 'w') as current:
-        json.dump(currentJSON, current, sort_keys=True, indent=2)
+    with open(scriptDir + '/assets/meta/queue.json', 'w') as createQueue:
+        json.dump(queueJSON, createQueue, sort_keys=True, indent=2)
+    with open(scriptDir + '/assets/meta/current.json', 'w') as createCurrent:
+        json.dump(currentJSON, createCurrent, sort_keys=True, indent=2)
 
 # Functions)
 def help(option=""):
@@ -96,7 +96,29 @@ def load(song):
         help("load")
 
 def queue(song):
-    print(song)
+    with open(scriptDir + '/assets/meta/current.json', 'r') as readCurrent:
+        current = json.load(readCurrent)
+        #currentSong = current['file']
+        #currentDuration = current['duration']
+        currentRemaining = current['remaining']
+
+    if currentRemaining == 0:
+        with open(scriptDir + '/assets/meta/queue.json', 'r') as readQueue:
+            queue = json.load(readQueue)
+            nextSong = queue['songs'][0]['file']
+            nextDuration = queue['songs'][0]['duration']
+
+            swap = {
+                "duration": nextDuration,
+                "file": nextSong,
+                "remaining": nextDuration
+            }    
+            
+        with open(scriptDir + './assets/meta/current.json', 'w') as swapCurrent:
+            json.dump(swap, swapCurrent, sort_keys=True, indent=2)
+    else:
+        print("get song length")
+        print("append to queue")
 
 while True:
     print()
