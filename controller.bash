@@ -257,12 +257,8 @@ function sync() {
 function skip() {
     selection=$1
     index=$((selection - 1))
-    number='^[1-9]+$' # Regex for accepting all numerical characters but 0
-    if [[ $selection =~ $number ]]; then
-        selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
-        cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
-        echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
-    elif [[ $selection == "" ]] || [[ $selection == 0 ]]; then
+    number='^[0-9]+$' # Regex for accepting only numerical characters
+    if [[ $selection == "" ]] || [[ $selection == 0 ]]; then
         if [[ `jq -r '.sync' $current` == "on" ]]; then 
             syncProcess "off"
             sleep 2s
@@ -274,6 +270,10 @@ function skip() {
             cat <<< $(jq '.remaining = 0' $current) > $current
             echo -e "[skipped $(tput setaf 4)`jq '.file' $current`$(tput sgr0)]\n"
         fi
+    elif [[ $selection =~ $number ]]; then
+        selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
+        cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
+        echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
     else
         echo -e "skip $(tput setaf 1)[index]$(tput sgr0)\n"
     fi
