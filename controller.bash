@@ -71,13 +71,13 @@ function syncActivity() {
 }
 
 function song() {
-    state=$1; directory=$2; file=$3
+    state=$1; directory=$2; file=$3; param=$4
     if [[ `echo "$file" | grep -w "\-y"` ]]; then # If the file has the -y parameter
         param="-y"
         file=`echo "${file%-y}" | xargs echo -n`
     fi
     if [ "$file" == "*" ]; then
-        playMultiple "$musicDir"
+        playMultiple "$musicDir" "$param"
         return
     fi
     if [[ ! $file ]]; then
@@ -88,7 +88,6 @@ function song() {
         if [[ $targetFile ]]; then
             if [ "$param" == "-y" ]; then 
                 answer="yes"
-                unset -v param
             else
                 read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
             fi
@@ -281,13 +280,13 @@ function skip() {
 }
 
 function playMultiple() {
-    list=$1
+    list=$1; param=$2
     for dir in $musicDir/*; do
         cancel=$? # return 0 = continue, return 1 = cancel
         if [ $cancel -ne 0 ]; then
             break
         else
-            song "play" "$musicDir" "${dir#$musicDir"/"}"
+            song "play" "$musicDir" "${dir#$musicDir"/"}" "$param"
         fi
     done
 }
