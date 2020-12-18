@@ -83,8 +83,7 @@ function song() {
     if [[ ! $file ]]; then
         echo -e "[$(tput setaf 1)please input song title$(tput sgr0)]\n"
     else
-        file=`echo "$file" | sed 's/[][]/\\&/g'`
-        targetFile=`ls $directory | sed 's/[][]/\\&/g' | grep -i -m1 "${file}"` # Find a matching file to input
+        targetFile=`ls $directory | grep -i -m1 -F "${file}"` # Find a matching file to input
         if [[ $targetFile ]]; then
             if [ "$param" == "-y" ]; then 
                 answer="yes"
