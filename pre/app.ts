@@ -183,6 +183,27 @@ function backgroundToggle() {
     }
 }
 
+/*trackName()*/
+function trackName() {
+    console.log("test");
+    fetch('assets/meta/current.json')
+        .then(function (file) {
+        return file.json();
+    })
+        .then(function (current) {
+        if (current.sync == "on") {
+            document.getElementsByTagName('p')[0].innerHTML = current.file;
+        }
+        else {
+            document.getElementsByTagName('p')[0].innerHTML = "Nothing Playing";
+        }
+    });
+    setTimeout(trackName, 2000);
+}
+if (document.title == "Current Murb Track") {
+    trackName();
+}
+
 var music = document.querySelector("#mu")!;
 var curb = document.querySelector("#rb")!;
 
