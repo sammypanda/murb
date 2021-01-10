@@ -71,24 +71,22 @@ function syncActivity() {
 }
 
 function song() {
-    state=$1; directory=$2; file=$3
+    state=$1; directory=$2; file=$3; param=$4
     if [[ `echo "$file" | grep -w "\-y"` ]]; then # If the file has the -y parameter
         param="-y"
         file=`echo "${file%-y}" | xargs echo -n`
     fi
     if [ "$file" == "*" ]; then
-        playMultiple "$musicDir"
+        playMultiple "$musicDir" "$param"
         return
     fi
     if [[ ! $file ]]; then
         echo -e "[$(tput setaf 1)please input song title$(tput sgr0)]\n"
     else
-        file=`echo "$file" | sed 's/[][]/\\&/g'`
-        targetFile=`ls $directory | sed 's/[][]/\\&/g' | grep -i -m1 "${file}"` # Find a matching file to input
+        targetFile=`ls $directory | grep -i -m1 -F "${file}"` # Find a matching file to input
         if [[ $targetFile ]]; then
             if [ "$param" == "-y" ]; then 
                 answer="yes"
-                unset -v param
             else
                 read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
             fi
@@ -258,12 +256,8 @@ function sync() {
 function skip() {
     selection=$1
     index=$((selection - 1))
-    number='^[1-9]+$' # Regex for accepting all numerical characters but 0
-    if [[ $selection =~ $number ]]; then
-        selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
-        cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
-        echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
-    elif [[ $selection == "" ]] || [[ $selection == 0 ]]; then
+    number='^[0-9]+$' # Regex for accepting only numerical characters
+    if [[ $selection == "" ]] || [[ $selection == 0 ]]; then
         if [[ `jq -r '.sync' $current` == "on" ]]; then 
             syncProcess "off"
             sleep 2s
@@ -275,19 +269,23 @@ function skip() {
             cat <<< $(jq '.remaining = 0' $current) > $current
             echo -e "[skipped $(tput setaf 4)`jq '.file' $current`$(tput sgr0)]\n"
         fi
+    elif [[ $selection =~ $number ]]; then
+        selectionSong=`jq --arg index $index -r '.songs[$index|tonumber].file' $queue`
+        cat <<< $(jq --arg index $index 'del(.songs[$index|tonumber])' $queue) > $queue
+        echo -e "[skipped $(tput setaf 4)$selectionSong$(tput sgr0)]\n"
     else
         echo -e "skip $(tput setaf 1)[index]$(tput sgr0)\n"
     fi
 }
 
 function playMultiple() {
-    list=$1
+    list=$1; param=$2
     for dir in $musicDir/*; do
         cancel=$? # return 0 = continue, return 1 = cancel
         if [ $cancel -ne 0 ]; then
             break
         else
-            song "play" "$musicDir" "${dir#$musicDir"/"}"
+            song "play" "$musicDir" "${dir#$musicDir"/"}" "$param"
         fi
     done
 }
