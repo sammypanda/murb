@@ -64,7 +64,7 @@ function syncActivity() {
     fi
 
     if [[ `jq -r '.sync' $current` == "on" ]]; then # Parameter 'jq -r' (raw) removes quotations from output
-        echo -e "[sync active at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
+        echo -e "[sync active at $(tput setaf 4)murb/.sync.log$(tput sgr0)]\n"
     else
         echo -e "[$(tput setaf 1)sync inactive$(tput sgr0)]\n"
     fi
@@ -85,7 +85,7 @@ function song() {
     else
         targetFile=`ls $directory | grep -i -m1 -F "${file}"` # Find a matching file to input
         if [[ $targetFile ]]; then
-            if [ "$param" == "-y" ]; then 
+            if [ "$param" == "-y" ]; then
                 answer="yes"
             else
                 read -p "Enter 'yes' to $state $(tput bold)$targetFile$(tput sgr0): " answer
@@ -192,7 +192,7 @@ function queue() {
         if [[ ! -f "$queue" ]] || [[ `cat $queue | jq -r '.file'` == "" ]]; then
             echo "{\"songs\": [{\"file\": \"$song\", \"duration\": \"$duration\"}]}" | jq . > $queue
             echo -e "\n[created queue with $(tput setaf 4)$song$(tput sgr0)]\n"
-        else 
+        else
             cat <<< $(jq ".songs += [{\"file\": \"$song\", \"duration\": \"$duration\"}]" $queue) > $queue
             echo -e "\n[queued $(tput setaf 4)$song$(tput sgr0)]\n"
         fi
@@ -203,16 +203,16 @@ function syncProcess() {
     kill $sync_pid &> /dev/null
     unset sync_pid
     if [[ $1 == "on" ]]; then
-        while [[ "`jq '.sync' $current`" == "\"off\"" ]]; do 
-            cat <<< $(jq '.sync = "on"' $current) > $current 
+        while [[ "`jq '.sync' $current`" == "\"off\"" ]]; do
+            cat <<< $(jq '.sync = "on"' $current) > $current
         done
         cat <<< $(jq '.sync = "on"' $current) > $current
         sync > .sync.log 2>&1 &
         sync_pid=$!
         echo -e "[started sync at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
     elif [[ $1 == "off" ]]; then
-        while [[ `jq '.sync' $current` == \"on\" ]]; do 
-            cat <<< $(jq '.sync = "off"' $current) > $current 
+        while [[ `jq '.sync' $current` == \"on\" ]]; do
+            cat <<< $(jq '.sync = "off"' $current) > $current
         done
         echo -e "[$(tput setaf 1)stopped sync$(tput sgr0)]\n"
     fi
@@ -258,7 +258,7 @@ function skip() {
     index=$((selection - 1))
     number='^[0-9]+$' # Regex for accepting only numerical characters
     if [[ $selection == "" ]] || [[ $selection == 0 ]]; then
-        if [[ `jq -r '.sync' $current` == "on" ]]; then 
+        if [[ `jq -r '.sync' $current` == "on" ]]; then
             syncProcess "off"
             sleep 2s
             cat <<< $(jq '.remaining = 0' $current) > $current
