@@ -75,6 +75,7 @@ function clientSync() {
             setTimeout(clientSync, 2000); // sets a constant reset
         } else if (current.sync == "on") {
             song.play().then(result => {
+                song.volume = (current.volume / 10) // Removes audio jank
                 playbutton.style.display = "none";
                 broadcast.innerHTML = "Broadcast joined <br> " + current.file;
                 console.log("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
@@ -86,7 +87,7 @@ function clientSync() {
                     .then(current => {
                         if (current.sync == "on") {
                             console.log("Sync: on");
-                            song.volume = (current.volume / 10);
+                            song.volume = (current.volume / 10); // Auto-updating
                             oopsies = 0;
                             setTimeout(ongoing, 2000);
                         } else if (current.sync == "off") {
