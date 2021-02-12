@@ -86,6 +86,7 @@ function clientSync() {
                     .then(current => {
                         if (current.sync == "on") {
                             console.log("Sync: on");
+                            song.volume = (current.volume / 10);
                             oopsies = 0;
                             setTimeout(ongoing, 2000);
                         } else if (current.sync == "off") {

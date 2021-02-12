@@ -1,8 +1,9 @@
 # Table of Contents:
     #1 Variables
         #1a Globals
-        #1b Load
-        #1c Help
+        #1b Syncing
+        #1c Load
+        #1d Help
     #2 Dependencies
         #2a Youtube-DL
         #2b JQ
@@ -23,15 +24,21 @@ script=$(readlink -f "$0")
 scriptDir=$(dirname "$script")
 musicDir="$scriptDir/assets/music"
 
+# Variables) Syncing
+current="$scriptDir/assets/meta/current.json"; queue="$scriptDir/assets/meta/queue.json"
+
+if [[ `jq '.volume' $current` ]]; then
+    volume=`jq '.volume' $current | xargs echo -n`
+else
+    volume="1"
+fi
+
 # Variables) Load
 mp3dl="youtube-dl -x --audio-format mp3 -o "$scriptDir/"'%(title)s.%(ext)s'"
 
 # Variables) Help
-help=("help*" "exit" "list" "load*" "remove*" "play*" "start" "stop" "skip*")
-tip=("outputs this message, try 'help [option]'" "exits the controller and sync process" "shows the queued and the loaded songs" "parses songs from youtube, try 'load [song name]'" "removes loaded songs, try 'remove [song]'" "plays loaded songs, try 'play [song]'" "moves songs from the queue to the play-state" "stops streaming to murb" "skips the current song, try 'skip [queue song index]'")
-
-# Variables) Syncing
-current="$scriptDir/assets/meta/current.json"; queue="$scriptDir/assets/meta/queue.json"
+help=("help*" "exit" "list" "load*" "remove*" "play*" "start" "stop" "skip*" "volume*")
+tip=("outputs this message, try 'help [option]'" "exits the controller and sync process" "shows the queued and the loaded songs" "parses songs from youtube, try 'load [song name]'" "removes loaded songs, try 'remove [song]'" "plays loaded songs, try 'play [song]'" "moves songs from the queue to the play-state" "stops streaming to murb" "skips the current song, try 'skip [queue song index]'" "adjusts the volume of the current song, try 'volume [0-10]' (default 1)")
 
 # Dependencies) Youtube-DL
 if ! [[ -f /usr/bin/youtube-dl ]]; then
@@ -232,6 +239,7 @@ function sync() {
             while [[ $time -ge 0 ]]; do
                 echo $time # Output seconds in .sync.log
                 cat <<< $(jq --arg time $time '.remaining = $time' $current) > $current # Update time
+                cat <<< $(jq --arg volume $volume '.volume = $volume' $current) > $current # Update volume
                 time=$(($time - 1))
                 sleep 0.95s # Adjusts for 0.05s delay
             done
@@ -290,6 +298,24 @@ function playMultiple() {
     done
 }
 
+function volume() {
+    value=$1
+    if [[ `jq '.sync' $current` == \"on\" ]]; then
+        if [[ $value =~ ^[+-]?[0-9]+$ ]] && [ $value -le 10 ]; then
+            syncProcess "off"
+            volume=$value
+            echo -e "[$(tput setaf 4)volume set to $(tput sgr0)$volume/10]\n"
+            syncProcess "on"
+        elif ! [[ $value ]]; then
+            echo -e "[$(tput setaf 4)the volume is currently $(tput sgr0)$volume/10]\n\nvolume $(tput setaf 1)[0-10]$(tput sgr0)\n"
+        else
+            echo -e "[$(tput setaf 1)volume out of bounds (0-10)$(tput sgr0)]\n"
+        fi
+    else 
+        echo -e "[$(tput setaf 1)nothing is playing, try 'start'$(tput sgr0)]\n"
+    fi
+}
+
 function trapsxoxo() {
     syncProcess "off" || cat <<< $(jq '.sync = "off"' $current) > $current
     rm -f $scriptDir/*{mp3,webm,m4a,part,ytdl}*
@@ -329,6 +355,9 @@ while true; do
         ;;
         skip*)
             skip "`echo ${input#skip} | xargs echo -n`"
+        ;;
+        volume*)
+            volume "`echo ${input#volume} | xargs echo -n`"
         ;;
         *)
             echo -e "[$(tput setaf 1)unknown command$(tput sgr0)]\ntry 'help'\n"
