@@ -21,6 +21,7 @@ var playbutton = document.getElementById('playbutton')!;
 var broadcast = document.getElementById('broadcast')!;
 var song = new Audio();
 var oopsies = 0
+var hangingvolume = 1
 
 function checkSync() { // doubles as auto-join
     fetch('assets/meta/current.json')
@@ -89,7 +90,11 @@ function clientSync() {
                     .then(current => {
                         if (current.sync == "on") {
                             console.log("Sync: on");
-                            song.volume = (current.volume / 10); // Auto-updating
+                            if ((current.volume / 10) !== hangingvolume) {
+                                song.volume = (current.volume / 10); // Auto-updating
+                                console.info("%cserver volume " + current.volume + "/10", "color: gray; font-weight: 900")
+                                hangingvolume = song.volume
+                            }
                             oopsies = 0;
                             setTimeout(ongoing, 2000);
                         } else if (current.sync == "off") {

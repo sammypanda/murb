@@ -30,7 +30,11 @@ current="$scriptDir/assets/meta/current.json"; queue="$scriptDir/assets/meta/que
 if [[ `jq '.volume' $current` ]]; then
     volume=`jq '.volume' $current | xargs echo -n`
 else
-    volume="1"
+    if [ -z ${originalvolume+x} ]; then 
+        originalvolume="1" && volume="1"
+    else
+        volume=$originalvolume
+    fi
 fi
 
 # Variables) Load
@@ -227,7 +231,8 @@ function syncProcess() {
 
 function sync() {
     while true; do
-    cat <<< $(jq '.sync = "on"' $current) > $current
+        cat <<< $(jq '.sync = "on"' $current) > $current
+        cat <<< $(jq --arg volume $originalvolume '.volume = $volume' $current) > $current # Update volume
         if [[ `cat $current | jq -r '.remaining'` -gt 0 ]]; then # The current song is still active
             time=`cat $current | jq -r '.remaining'`
             file=`jq -r '.file' $current`
@@ -237,11 +242,11 @@ function sync() {
                 echo -e "\n[resuming $(tput setaf 4)$file$(tput sgr0)]\n"
             fi
             while [[ $time -ge 0 ]]; do
+                sleep 1 &
                 echo $time # Output seconds in .sync.log
                 cat <<< $(jq --arg time $time '.remaining = $time' $current) > $current # Update time
-                cat <<< $(jq --arg volume $volume '.volume = $volume' $current) > $current # Update volume
                 time=$(($time - 1))
-                sleep 0.95s # Adjusts for 0.05s delay
+                wait $!
             done
         else # The current song has finished
             file=`jq -r '.songs[0].file' $queue`
@@ -302,10 +307,10 @@ function volume() {
     value=$1
     if [[ `jq '.sync' $current` == \"on\" ]]; then
         if [[ $value =~ ^[+-]?[0-9]+$ ]] && [ $value -le 10 ]; then
-            syncProcess "off"
             volume=$value
+            originalvolume=$value # Update the oldie that initiated the volume field originally
             echo -e "[$(tput setaf 4)volume set to $(tput sgr0)$volume/10]\n"
-            syncProcess "on"
+            cat <<< $(jq --arg volume $value '.volume = $volume' $current) > $current # Update volume
         elif ! [[ $value ]]; then
             echo -e "[$(tput setaf 4)the volume is currently $(tput sgr0)$volume/10]\n\nvolume $(tput setaf 1)[0-10]$(tput sgr0)\n"
         else
