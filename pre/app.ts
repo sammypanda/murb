@@ -10,7 +10,9 @@
         2.3 logo()
         2.4 getCookie()
         2.5 background()
-        2.6 backgroundToggle()*/
+        2.6 backgroundToggle()
+    3. Utils
+        3.1 removeExt() */
     
 /*main*/
 background("on");
