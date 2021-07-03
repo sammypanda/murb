@@ -29,7 +29,7 @@ function checkSync() { // doubles as auto-join
         var messagePart = broadcast.innerHTML.split(" ");
         if (current.sync == "on") {
             if (messagePart[1] == "ongoing" || messagePart[0] == "No" || messagePart[2] == "host" || messagePart[0] == "Uh-oh,") {
-                broadcast.innerHTML = "Broadcast ongoing <br> " + current.file;
+                broadcast.innerHTML = "Broadcast ongoing <br> " + removeExt(current.file);
             }
         } else if (current.sync == "off") {
             if (messagePart[3] !== "auto-join") {
@@ -77,7 +77,7 @@ function clientSync() {
             song.play().then(result => {
                 song.volume = (current.volume / 10) // Removes audio jank
                 playbutton.style.display = "none";
-                broadcast.innerHTML = "Broadcast joined <br> " + current.file;
+                broadcast.innerHTML = "Broadcast joined <br> " + removeExt(current.file);
                 console.log("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
                 function ongoing() { // keeps checking sync status once sync is seen as on
                     fetch('./assets/meta/current.json')
@@ -187,12 +187,13 @@ function backgroundToggle() {
 
 /*trackName()*/
 function trackName() {
-    console.log("test");
     fetch('assets/meta/current.json')
         .then(function (file) {
         return file.json();
     })
         .then(function (current) {
+        current.file = removeExt(current.file)
+
         if (current.sync == "on") {
             document.getElementsByTagName('p')[0].innerHTML = current.file;
         }
@@ -214,3 +215,10 @@ var curb = document.querySelector("#rb")!;
         window.location.href = "https://github.com/Samdvich/murb";
     });
 });
+
+/*removeExt()*/
+function removeExt(track: string) {
+    var noext = track.split('.')
+    noext.splice(-1)
+    return noext
+}
