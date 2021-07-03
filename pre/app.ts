@@ -68,7 +68,7 @@ function clientSync() {
 
         if (current.sync == "off") {
             oopsies = 0;
-            console.log("Sync: off");
+            console.log("Sync: %coff", "color: palevioletred");
             broadcast.innerHTML = "No broadcast ongoing<br> auto-join is on, reload to turn off";
             playbutton.removeAttribute('onclick');
             playbutton.style.color = "darkcyan";
@@ -81,7 +81,7 @@ function clientSync() {
                 song.volume = (current.volume / 10) // Removes audio jank
                 playbutton.style.display = "none";
                 broadcast.innerHTML = "Broadcast joined <br> " + removeExt(current.file);
-                console.log("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
+                console.info("%cjoined at " + song.currentTime + "/" + current.duration + " seconds of " + current.file, "font-weight: 700");
                 function ongoing() { // keeps checking sync status once sync is seen as on
                     fetch('./assets/meta/current.json')
                     .then(file => {
@@ -89,7 +89,9 @@ function clientSync() {
                     })
                     .then(current => {
                         if (current.sync == "on") {
-                            console.log("Sync: on");
+                            console.log("Sync: %con", "color: lightgreen");
+                            console.log("%cclient: " + (song.duration - song.currentTime) + "s", "color: gray; font-weight: 100")
+                            console.log("%cserver: " + current.remaining + "s", "color: gray; font-weight: 100")
                             if ((current.volume / 10) !== hangingvolume) {
                                 song.volume = (current.volume / 10); // Auto-updating
                                 console.info("%cserver volume " + current.volume + "/10", "color: gray; font-weight: 900")
