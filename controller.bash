@@ -217,7 +217,6 @@ function syncProcess() {
         while [[ "`jq '.sync' $current`" == "\"off\"" ]]; do
             cat <<< $(jq '.sync = "on"' $current) > $current
         done
-        cat <<< $(jq '.sync = "on"' $current) > $current
         sync > .sync.log 2>&1 &
         sync_pid=$!
         echo -e "[started sync at $(tput setaf 4)./.sync.log$(tput sgr0)]\n"
@@ -232,7 +231,18 @@ function syncProcess() {
 function sync() {
     while true; do
         cat <<< $(jq '.sync = "on"' $current) > $current
-        cat <<< $(jq --arg volume $originalvolume '.volume = $volume' $current) > $current # Update volume
+        if [[ $originalvolume ]]; then
+            cat <<< $(jq --arg volume $originalvolume '.volume = $volume' $current) > $current # Update volume
+        else
+            if [[ $(cat $current | jq -r '.volume') == null ]]; then # if the volume key in current.json returns null
+                originalvolume=1
+                cat <<< $(jq --arg volume 1 '.volume = $volume' $current) > $current # Create an 'original volume'
+            else
+                embeddedvolume=`cat $current | jq -r '.volume'`
+                originalvolume=$embeddedvolume
+                cat <<< $(jq --arg volume $embeddedvolume '.volume = $volume' $current) > $current # Use the volume from current.json
+            fi
+        fi
         if [[ `cat $current | jq -r '.remaining'` -gt 0 ]]; then # The current song is still active
             time=`cat $current | jq -r '.remaining'`
             file=`jq -r '.file' $current`

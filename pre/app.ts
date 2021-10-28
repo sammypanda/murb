@@ -58,15 +58,19 @@ function clientSync() {
     .then(current => {
         if (song.id !== "currentSong") {
             var duration = (current.duration - current.remaining);
-            song = new Audio("assets/music/" + current.file);
+            if (song) {
+                song.src = "assets/music/" + current.file;
+                song.load();
+                song.currentTime = duration;
+            } else {
+                song = new Audio("assets/music/" + current.file);
                 song.id = "currentSong";
                 song.currentTime = duration;
-        } else {
-            console.log("[Broadcast already running]");
-            return;
+            }
         }
 
         if (current.sync == "off") {
+            song.pause
             oopsies = 0;
             console.log("Sync: %coff", "color: palevioletred");
             broadcast.innerHTML = "No broadcast ongoing<br> auto-join is on, reload to turn off";
@@ -74,8 +78,7 @@ function clientSync() {
             playbutton.style.color = "darkcyan";
             playbutton.style.cursor = "default";
             playbutton.style.display = "grid";
-            song.id = "";
-            setTimeout(clientSync, 2000); // sets a constant reset
+            setTimeout(clientSync, 500); // sets a constant reset
         } else if (current.sync == "on") {
             song.play().then(result => {
                 song.volume = (current.volume / 10) // Removes audio jank
@@ -98,19 +101,15 @@ function clientSync() {
                                 hangingvolume = song.volume
                             }
                             oopsies = 0;
-                            setTimeout(ongoing, 2000);
+                            setTimeout(ongoing, 1000);
                         } else if (current.sync == "off") {
                             oopsies = 0;
                             song.pause();
-                            song.id = "";
                             clientSync();
-                        } else {
-                            ongoing()
                         }
                         song.onended = () => {
                             oopsies = 0;
                             song.pause();
-                            song.id = "";
                             clientSync();
                         }
                     })
@@ -124,7 +123,7 @@ function clientSync() {
                         }
                     });
                 }
-                ongoing(); // triggering the sync status check
+                setTimeout(ongoing, 2000); // triggering the sync status check
             });
         } else {
             clientSync();
