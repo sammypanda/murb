@@ -114,7 +114,7 @@ def queue(song):
                 "remaining": nextDuration
             }    
             
-        with open(scriptDir + './assets/meta/current.json', 'w') as swapCurrent:
+        with open(scriptDir + '/assets/meta/current.json', 'w') as swapCurrent:
             json.dump(swap, swapCurrent, sort_keys=True, indent=2)
     else:
         print("get song length")
