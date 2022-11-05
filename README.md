@@ -1,5 +1,5 @@
 <h1 align='center'>murb</h1>
-<h6 align='center'>murb = music+curb</h6>
+<h6 align='center'>murb = music+curb. Broadcast your local music files</h6>
 
 <p align='center'>
 <img alt='murb controller demo' src='https://user-images.githubusercontent.com/38725335/100362340-03d47a80-3047-11eb-90a8-79825582a130.gif' width='50%' height='auto'></img>
