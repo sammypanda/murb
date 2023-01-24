@@ -116,7 +116,7 @@ function clientSync() {
                     .catch((error) => {
                         console.log("%c[smol json oopsie-doopsie]", "color: lightpink; font-weight: 700");
                         if (oopsies >= 16) {
-                            window.location.reload(false);
+                            window.location.reload();
                         } else {
                             oopsies+=1;
                             setTimeout(ongoing, 1000);
@@ -135,7 +135,7 @@ function clientSync() {
         playbutton.style.color = "darkcyan";
         playbutton.style.cursor = "default";
         if (oopsies == 6) {
-            window.location.reload(false);
+            window.location.reload();
         } else {
             oopsies+=1;
             setTimeout(clientSync, 1000);
